@@ -1,0 +1,18 @@
+import { PersistantStateRef } from "../lib/persistantState";
+
+const counter = document.querySelector('[data-hook="counter"]') as HTMLElement;
+
+const ref = new PersistantStateRef<number>('num_record', 'cookie', 0);
+
+counter.textContent = ref.value.toString();
+console.log(ref.value);
+
+ref.watch((value) => {
+	console.log(value);
+	counter.textContent = value.toString()
+});
+
+document.querySelectorAll<HTMLButtonElement>('[data-action]').forEach(item => item.addEventListener('click', () => {
+	const step = item.getAttribute('data-action')?.includes('+') ? 1 : -1;
+	ref.value += step;
+}));

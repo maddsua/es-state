@@ -10,5 +10,9 @@
 		"url": "git+https://github.com/maddsua/es-state.git"
 	},
 	"author": "maddsua",
-	"license": "MIT"
+	"license": "MIT",
+	"devDependencies": {
+		"esbuild": "^0.19.3",
+		"tsc": "^2.0.4"
+	}
 }

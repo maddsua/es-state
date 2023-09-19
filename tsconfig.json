@@ -4,5 +4,8 @@
 		"lib": ["ES6", "ESNext", "DOM"],
 		"target": "ESNext",
 		"declaration": true
-	}
+	},
+	"exclude": [
+		"test/deno.test.ts"
+	]
 }
