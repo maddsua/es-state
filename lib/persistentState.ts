@@ -1,7 +1,7 @@
 
 type PersistenceType = 'sessionStorage' | 'localStorage' | 'cookie';
 
-export class PersistantStateRef<T> {
+export class PersistentStateRef<T> {
 
 	_internal_value: T;
 	_watchers: Array<(newValue: T) => void> = [];
@@ -32,7 +32,7 @@ export class PersistantStateRef<T> {
 			stateString ? (this._internal_value = JSON.parse(stateString) as T) : undefined;
 		
 		} catch (_error) {
-			console.error(`Failed to restore PersistantStateRef for: "${record_name}"`);
+			console.error(`Failed to restore PersistentStateRef for: "${record_name}"`);
 		}
 	};
 
@@ -69,7 +69,7 @@ export class PersistantStateRef<T> {
 			}
 
 		} catch (_error) {
-			console.error(`Failed to save PersistantStateRef for: "${this._record_name}"`);
+			console.error(`Failed to save PersistentStateRef for: "${this._record_name}"`);
 		}
 	};
 };

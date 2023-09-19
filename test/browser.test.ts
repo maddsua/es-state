@@ -1,8 +1,8 @@
-import { PersistantStateRef } from "../lib/persistantState";
+import { PersistentStateRef } from "../lib/persistentState";
 
 const counter = document.querySelector('[data-hook="counter"]') as HTMLElement;
 
-const ref = new PersistantStateRef<number>('num_record', 'cookie', 0);
+const ref = new PersistentStateRef<number>('num_record', 'cookie', 0);
 
 counter.textContent = ref.value.toString();
 console.log(ref.value);
