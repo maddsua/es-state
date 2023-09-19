@@ -1,0 +1,29 @@
+
+export class StateRef<T> {
+
+	_internal_value?: T;
+	_watchers: Array<(newValue: T) => void> = [];
+
+	constructor(value?: T) {
+		this._internal_value = value;
+	};
+
+	watch(watcher: (newValue: T) => void) {
+		if (this._watchers.some(item => item === watcher)) return;
+		this._watchers.push(watcher);
+	};
+
+	unwatch(watcher: (newValue: T) => void) {
+		this._watchers = this._watchers.filter(item => item !== watcher);
+	};
+
+	get value() {
+		return this._internal_value;
+	};
+
+	set value(newValue: T) {
+		this._internal_value = newValue;
+		this._watchers = this._watchers.filter(item => item);
+		this._watchers.forEach((watcher) => (async () => watcher(this._internal_value))().catch(error => console.error('StateRef watcher crashed:', error)));
+	};
+};
