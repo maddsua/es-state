@@ -1,0 +1,14 @@
+{
+	"type": "module",
+	"name": "@maddsua/es-state",
+	"version": "1.0.0",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"description": "Reactive state refs for vanilla JS/TS ",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/maddsua/es-state.git"
+	},
+	"author": "maddsua",
+	"license": "MIT"
+}
