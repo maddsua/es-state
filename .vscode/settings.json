@@ -1,7 +1,0 @@
-{
-	"deno.enable": true,
-	"deno.lint": false,
-	"deno.enablePaths": [
-		"test/deno.test.ts"
-	]
-}

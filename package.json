@@ -1,7 +1,8 @@
 {
-	"type": "module",
+	"private": false,
 	"name": "@maddsua/es-state",
 	"version": "1.0.0",
+	"type": "module",
 	"main": "./dist/index.js",
 	"types": "./dist/index.d.ts",
 	"description": "Reactive state refs for vanilla JS/TS ",
@@ -14,5 +15,12 @@
 	"devDependencies": {
 		"esbuild": "^0.19.3",
 		"tsc": "^2.0.4"
+	},
+	"scripts": {
+		"build": "tsc",
+		"deploy": "tsc && npm publish --access=public",
+		"build:test:web": "esbuild test/browser.test.ts --outfile=.temp/browser.test.js --bundle --minify",
+		"build:test:node": "esbuild test/node.test.ts --outfile=.temp/node.test.js --bundle --minify",
+		"test:node": "node .temp/node.test.js"
 	}
 }
