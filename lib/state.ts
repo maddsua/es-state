@@ -1,10 +1,10 @@
 
 export class StateRef<T> {
 
-	_internal_value?: T;
+	_internal_value: T;
 	_watchers: Array<(newValue: T) => void> = [];
 
-	constructor(initValue?: T) {
+	constructor(initValue: T) {
 		this._internal_value = initValue;
 	};
 

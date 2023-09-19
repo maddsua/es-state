@@ -8,7 +8,7 @@ export class PersistentStateRef<T> {
 	_persistence_type: PersistenceType;
 	_record_name: string;
 
-	constructor(record_name: string, type?: PersistenceType, initValue?: T) {
+	constructor(initValue: T, record_name: string, type?: PersistenceType) {
 
 		this._internal_value = initValue;
 		this._persistence_type = type || 'sessionStorage';
@@ -21,7 +21,7 @@ export class PersistentStateRef<T> {
 			let stateString: string | undefined = undefined;
 
 			if (type === 'localStorage' || type === 'sessionStorage') {
-				stateString = (type === 'sessionStorage' ? sessionStorage : localStorage).getItem(record_name);
+				stateString = (type === 'sessionStorage' ? sessionStorage : localStorage).getItem(record_name) as string | undefined;
 			}
 			else if (type === 'cookie') {
 				const cookies = document.cookie.split('; ').map(item => item.split('=')).map(([key, value]) => ({ key, value}));
