@@ -17,11 +17,11 @@
 	"license": "MIT",
 	"devDependencies": {
 		"esbuild": "^0.19.3",
-		"tsc": "^2.0.4"
+		"typescript": "^5.2.2"
 	},
 	"scripts": {
 		"build": "tsc",
-		"deploy": "tsc && npm publish --access=public",
+		"deploy": "tsc && npm publish --access public",
 		"build:test:web": "esbuild test/browser.test.ts --outfile=.temp/browser.test.js --bundle --minify",
 		"build:test:node": "esbuild test/node.test.ts --outfile=.temp/node.test.js --bundle --minify",
 		"test:node": "node .temp/node.test.js"
