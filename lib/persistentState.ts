@@ -14,25 +14,32 @@ export class PersistentStateRef<T> {
 		this._persistence_type = type || 'sessionStorage';
 		this._record_name = record_name;
 
-		if (typeof window == 'undefined') return;
+		this.hydrate();
+	};
+
+	hydrate() {
+
+		if (typeof window == 'undefined') return false;
 
 		try {
 
 			let stateString: string | undefined = undefined;
 
-			if (type === 'localStorage' || type === 'sessionStorage') {
-				stateString = (type === 'sessionStorage' ? sessionStorage : localStorage).getItem(record_name) as string | undefined;
+			if (this._persistence_type === 'localStorage' || this._persistence_type === 'sessionStorage') {
+				stateString = (this._persistence_type === 'sessionStorage' ? sessionStorage : localStorage).getItem(this._record_name) as string | undefined;
 			}
-			else if (type === 'cookie') {
+			else if (this._persistence_type === 'cookie') {
 				const cookies = document.cookie.split('; ').map(item => item.split('=')).map(([key, value]) => ({ key, value}));
 				stateString = cookies.find(item => item.key === this._record_name)?.value;
 				if (stateString) stateString = decodeURIComponent(stateString);
 			}
 
 			stateString ? (this._internal_value = JSON.parse(stateString) as T) : undefined;
-		
+			return true;
+
 		} catch (_error) {
-			console.error(`Failed to restore PersistentStateRef for: "${record_name}"`);
+			console.error(`Failed to restore PersistentStateRef for: "${this._record_name}"`);
+			return false;
 		}
 	};
 
