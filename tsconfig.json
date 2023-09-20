@@ -5,5 +5,8 @@
 		"target": "ESNext",
 		"declaration": true,
 		"strict": true
-	}
+	},
+	"include": [
+		"lib"
+	]
 }
