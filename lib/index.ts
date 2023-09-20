@@ -1,5 +1,5 @@
-import { StateRef } from './state';
-import { PersistentStateRef } from './persistentState';
+import { StateRef } from './state.js';
+import { PersistentStateRef } from './persistentState.js';
 
 export {
 	StateRef,
