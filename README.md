@@ -1,36 +1,32 @@
 # es-state
 
-Vue-like ref() but not bound to any specific framework. Persistant in local/session storage or cookie
+Vue-like ref() but not bound to any specific framework. Persistent in local/session storage or cookie
 
 ## Usage example
 
 ```javascript
-//	shared_module.js
-
+//  shared_module.js
 import { PersistentStateRef } from '@maddsua/es-state';
 export const editorSession = new PersistentStateRef(null, 'editor_session_data');
 ```
 
 ```javascript
-//	module_A.js
-
+//  module_A.js
 import { editorSession } from './shared_module.js';
 editorSession.watch((value) => console.log('Session data was updated:', value));
 ```
 
 
 ```javascript
-//	module_B.js
-
+//  module_B.js
 import { editorSession } from './shared_module.js';
-
-//	pretend that it's fetching some data
+//  pretend that it's fetching some data
 setTiomeout(() => {
-	editorSession.value = {
-		username: 'name',
-		rights: 'all',
-		rizz: 'none'
-	};
+  editorSession.value = {
+    username: 'name',
+    rights: 'all',
+    rizz: 'none'
+  };
 }, 1000);
 ```
 
