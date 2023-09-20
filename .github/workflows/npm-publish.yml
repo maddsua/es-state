@@ -1,0 +1,22 @@
+name: Publish NPM Package
+
+on:
+  push:
+    branches: ['main']
+    paths: ['package.json']
+
+jobs:
+  compile_and_pack:
+    name: Compile and pack the package
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 18
+        registry-url: https://registry.npmjs.org/
+    - run: npm ci
+    - run: npx tsc
+    - run: npm publish --access public
+      env:
+        NODE_AUTH_TOKEN: ${{secrets.NPM_PUBLISH}}
