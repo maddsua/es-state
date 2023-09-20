@@ -8,7 +8,7 @@ on:
 
 jobs:
   deploy_package:
-    name: Deploy package to npm
+    name: Compile and pack the package
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
