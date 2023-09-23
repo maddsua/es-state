@@ -94,16 +94,11 @@ export class PersistentStateRef<T> {
 
 		try {
 
-			const stateString = JSON.stringify(this._internal_value);
-			if (this._storage_type === 'localStorage' || this._storage_type === 'sessionStorage') {
-				(this._storage_type === 'sessionStorage' ? sessionStorage : localStorage).setItem(this._record_name, stateString);
+			if (newValue !== null) {
+				const stateString = JSON.stringify(this._internal_value);
+				this._storage?.setItem(this._record_name, stateString);
 			}
-			else if (this._storage_type === 'cookie') {
-				const stateStringEncoded = encodeURIComponent(stateString);
-				const cookieExpiration = new Date(new Date().getTime() + 1_209_600_000);
-				const cookieEncodedState = `${this._record_name}=${stateStringEncoded}; expires=${cookieExpiration.toUTCString()}`;
-				document.cookie = cookieEncodedState;
-			}
+			else this._storage?.removeItem(this._record_name);
 
 		} catch (_error) {
 			console.error(`Failed to save PersistentStateRef for: "${this._record_name}"`);
