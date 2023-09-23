@@ -1,17 +1,37 @@
 
-type PersistenceType = 'sessionStorage' | 'localStorage' | 'cookie';
+type StorageType = 'sessionStorage' | 'localStorage' | 'cookie';
+
+/**
+ * An absolutely overengineered solution but it looks nice when in use
+ */
+class CookieStorage {
+	getItem(key: string) {
+		const entries = document.cookie.split('; ').map(item => item.split('=', 2) as [string, string]);
+		const cookie = entries.find(item => item[0] === key)?.[1];
+		return cookie ? decodeURIComponent(cookie) : null;
+	};
+	setItem(key: string, value: string, expires?: Date) {
+		const valueEncoded = encodeURIComponent(value);
+		const cookieExpiration = expires || new Date(new Date().getTime() + 1_209_600_000);
+		document.cookie = `${key}=${valueEncoded}; expires=${cookieExpiration.toUTCString()}`;
+	};
+	removeItem(key: string) {
+		this.setItem(key, '', new Date(0));
+	};
+};
 
 export class PersistentStateRef<T> {
 
 	_internal_value: T;
 	_watchers: Array<(newValue: T) => void> = [];
-	_persistence_type: PersistenceType;
+	_storage_type: StorageType;
 	_record_name: string;
+	_storage?: Storage | CookieStorage;
 
-	constructor(initValue: T, record_name: string, type?: PersistenceType) {
+	constructor(initValue: T, record_name: string, type?: StorageType) {
 
 		this._internal_value = initValue;
-		this._persistence_type = type || 'sessionStorage';
+		this._storage_type = type || 'sessionStorage';
 		this._record_name = record_name;
 
 		this.hydrate();
@@ -21,20 +41,27 @@ export class PersistentStateRef<T> {
 
 		if (typeof window == 'undefined') return false;
 
+		switch (this._storage_type) {
+
+			case 'cookie':
+				this._storage = new CookieStorage();
+				break;
+
+			case 'localStorage':
+				this._storage = localStorage;
+				break;
+			
+			case 'sessionStorage':
+				this._storage = sessionStorage;
+				break;
+		
+			default: throw new Error('Unknown storage type');
+		}
+
 		try {
 
-			let stateString: string | undefined = undefined;
-
-			if (this._persistence_type === 'localStorage' || this._persistence_type === 'sessionStorage') {
-				stateString = (this._persistence_type === 'sessionStorage' ? sessionStorage : localStorage).getItem(this._record_name) as string | undefined;
-			}
-			else if (this._persistence_type === 'cookie') {
-				const cookies = document.cookie.split('; ').map(item => item.split('=')).map(([key, value]) => ({ key, value}));
-				stateString = cookies.find(item => item.key === this._record_name)?.value;
-				if (stateString) stateString = decodeURIComponent(stateString);
-			}
-
-			stateString ? (this._internal_value = JSON.parse(stateString) as T) : undefined;
+			let stateString = this._storage.getItem(this._record_name);
+			if (stateString) this._internal_value = JSON.parse(stateString);
 			return true;
 
 		} catch (_error) {
@@ -64,16 +91,11 @@ export class PersistentStateRef<T> {
 
 		try {
 
-			const stateString = JSON.stringify(this._internal_value);
-			if (this._persistence_type === 'localStorage' || this._persistence_type === 'sessionStorage') {
-				(this._persistence_type === 'sessionStorage' ? sessionStorage : localStorage).setItem(this._record_name, stateString);
+			if (newValue !== null) {
+				const stateString = JSON.stringify(this._internal_value);
+				this._storage?.setItem(this._record_name, stateString);
 			}
-			else if (this._persistence_type === 'cookie') {
-				const stateStringEncoded = encodeURIComponent(stateString);
-				const cookieExpiration = new Date(new Date().getTime() + 1_209_600_000);
-				const cookieEncodedState = `${this._record_name}=${stateStringEncoded}; expires=${cookieExpiration.toUTCString()}`;
-				document.cookie = cookieEncodedState;
-			}
+			else this._storage?.removeItem(this._record_name);
 
 		} catch (_error) {
 			console.error(`Failed to save PersistentStateRef for: "${this._record_name}"`);
