@@ -1,14 +1,12 @@
 
 type StorageType = 'sessionStorage' | 'localStorage' | 'cookie';
-type CookieEntry = [string, string];
-type StorageImplementationType = Storage | CookieStorage;
 
 /**
  * An absolutely overengineered solution but it looks nice when in use
  */
 class CookieStorage {
 	getItem(key: string) {
-		const entries: CookieEntry[] = document.cookie.split('; ').map(item => item.split('=', 2) as CookieEntry);
+		const entries = document.cookie.split('; ').map(item => item.split('=', 2) as [string, string]);
 		const cookie = entries.find(item => item[0] === key)?.[1];
 		return cookie ? decodeURIComponent(cookie) : null;
 	};
@@ -28,7 +26,7 @@ export class PersistentStateRef<T> {
 	_watchers: Array<(newValue: T) => void> = [];
 	_storage_type: StorageType;
 	_record_name: string;
-	_storage?: StorageImplementationType;
+	_storage?: Storage | CookieStorage;
 
 	constructor(initValue: T, record_name: string, type?: StorageType) {
 
