@@ -3,7 +3,6 @@ type StorageType = 'sessionStorage' | 'localStorage' | 'cookie';
 type CookieEntry = [string, string];
 type StorageImplementationType = Storage | CookieStorage;
 
-
 /**
  * An absolutely overengineered solution but it looks nice when in use
  */
