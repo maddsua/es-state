@@ -21,7 +21,7 @@ editorSession.watch((value) => console.log('Session data was updated:', value));
 //  module_B.js
 import { editorSession } from './shared_module.js';
 //  pretend that it's fetching some data
-setTiomeout(() => {
+setTimeout(() => {
   editorSession.value = {
     username: 'name',
     rights: 'all',
