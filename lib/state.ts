@@ -22,8 +22,16 @@ export class StateRef<T> {
 	};
 
 	set value(newValue: T) {
+
 		this._internal_value = newValue;
+
 		this._watchers = this._watchers.filter(item => item);
-		this._watchers.forEach((watcher) => (async () => watcher(this._internal_value))().catch(error => console.error('StateRef watcher crashed:', error)));
+		this._watchers.forEach(watcher => {
+			try {
+				watcher(this._internal_value);
+			} catch (error) {
+				console.error('StateRef watcher crashed:', error);
+			}
+		});
 	};
 };
