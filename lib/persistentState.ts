@@ -37,6 +37,19 @@ export class PersistentStateRef<T> {
 		this.hydrate();
 	};
 
+	_updateWatchers() {
+
+		this._watchers = this._watchers.filter(item => item);
+
+		this._watchers.forEach(watcher => {
+			try {
+				watcher(this._internal_value);
+			} catch (error) {
+				console.error('StateRef watcher crashed:', error);
+			}
+		});
+	};
+
 	hydrate() {
 
 		if (typeof window == 'undefined') return false;
@@ -62,12 +75,14 @@ export class PersistentStateRef<T> {
 
 			let stateString = this._storage.getItem(this._record_name);
 			if (stateString) this._internal_value = JSON.parse(stateString);
-			return true;
-
+			
 		} catch (_error) {
 			console.error(`Failed to restore PersistentStateRef for: "${this._record_name}"`);
 			return false;
 		}
+
+		this._updateWatchers();
+		return true;
 	};
 
 	watch(watcher: (newValue: T) => void) {
@@ -86,8 +101,7 @@ export class PersistentStateRef<T> {
 	set value(newValue: T) {
 
 		this._internal_value = newValue;
-		this._watchers = this._watchers.filter(item => item);
-		this._watchers.forEach((watcher) => (async () => watcher(this._internal_value))().catch(error => console.error('StateRef watcher crashed:', error)));
+		this._updateWatchers();
 
 		try {
 
