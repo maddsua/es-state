@@ -39,9 +39,7 @@ export class PersistentStateRef<T> {
 	};
 
 	_updateWatchers() {
-
 		this._watchers = this._watchers.filter(item => item);
-
 		this._watchers.forEach(watcher => {
 			try {
 				watcher(this._internal_value);
