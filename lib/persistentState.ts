@@ -27,6 +27,7 @@ export class PersistentStateRef<T> {
 	_storage_type: StorageType;
 	_record_name: string;
 	_storage?: Storage | CookieStorage;
+	hydrated: boolean = false;
 
 	constructor(initValue: T, record_name: string, type?: StorageType) {
 
@@ -35,6 +36,17 @@ export class PersistentStateRef<T> {
 		this._record_name = record_name;
 
 		this.hydrate();
+	};
+
+	_updateWatchers() {
+		this._watchers = this._watchers.filter(item => item);
+		this._watchers.forEach(watcher => {
+			try {
+				watcher(this._internal_value);
+			} catch (error) {
+				console.error('StateRef watcher crashed:', error);
+			}
+		});
 	};
 
 	hydrate() {
@@ -59,15 +71,16 @@ export class PersistentStateRef<T> {
 		}
 
 		try {
-
 			let stateString = this._storage.getItem(this._record_name);
 			if (stateString) this._internal_value = JSON.parse(stateString);
-			return true;
-
 		} catch (_error) {
 			console.error(`Failed to restore PersistentStateRef for: "${this._record_name}"`);
 			return false;
 		}
+
+		this.hydrated = true;
+		this._updateWatchers();
+		return true;
 	};
 
 	watch(watcher: (newValue: T) => void) {
@@ -75,7 +88,7 @@ export class PersistentStateRef<T> {
 		this._watchers.push(watcher);
 	};
 
-	unwatch(watcher: (newValue: T) => void) {
+	unwatch(watcher: () => void) {
 		this._watchers = this._watchers.filter(item => item !== watcher);
 	};
 
@@ -86,8 +99,7 @@ export class PersistentStateRef<T> {
 	set value(newValue: T) {
 
 		this._internal_value = newValue;
-		this._watchers = this._watchers.filter(item => item);
-		this._watchers.forEach((watcher) => (async () => watcher(this._internal_value))().catch(error => console.error('StateRef watcher crashed:', error)));
+		this._updateWatchers();
 
 		try {
 

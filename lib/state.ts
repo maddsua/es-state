@@ -13,7 +13,7 @@ export class StateRef<T> {
 		this._watchers.push(watcher);
 	};
 
-	unwatch(watcher: (newValue: T) => void) {
+	unwatch(watcher: () => void) {
 		this._watchers = this._watchers.filter(item => item !== watcher);
 	};
 
@@ -22,8 +22,16 @@ export class StateRef<T> {
 	};
 
 	set value(newValue: T) {
+
 		this._internal_value = newValue;
+
 		this._watchers = this._watchers.filter(item => item);
-		this._watchers.forEach((watcher) => (async () => watcher(this._internal_value))().catch(error => console.error('StateRef watcher crashed:', error)));
+		this._watchers.forEach(watcher => {
+			try {
+				watcher(this._internal_value);
+			} catch (error) {
+				console.error('StateRef watcher crashed:', error);
+			}
+		});
 	};
 };
