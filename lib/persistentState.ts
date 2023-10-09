@@ -53,8 +53,6 @@ export class PersistentStateRef<T> {
 
 	hydrate() {
 
-		if (this.hydrated) console.warn('hydrate() method was called more than one time');
-
 		if (typeof window == 'undefined') return false;
 
 		switch (this._storage_type) {
