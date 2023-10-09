@@ -27,6 +27,7 @@ export class PersistentStateRef<T> {
 	_storage_type: StorageType;
 	_record_name: string;
 	_storage?: Storage | CookieStorage;
+	_hydrated: boolean = false;
 
 	constructor(initValue: T, record_name: string, type?: StorageType) {
 
@@ -51,6 +52,8 @@ export class PersistentStateRef<T> {
 	};
 
 	hydrate() {
+
+		if (this._hydrated) console.warn('hydrate() method was called more than one time');
 
 		if (typeof window == 'undefined') return false;
 
@@ -81,6 +84,7 @@ export class PersistentStateRef<T> {
 			return false;
 		}
 
+		this._hydrated = true;
 		this._updateWatchers();
 		return true;
 	};
