@@ -71,10 +71,8 @@ export class PersistentStateRef<T> {
 		}
 
 		try {
-
 			let stateString = this._storage.getItem(this._record_name);
 			if (stateString) this._internal_value = JSON.parse(stateString);
-			
 		} catch (_error) {
 			console.error(`Failed to restore PersistentStateRef for: "${this._record_name}"`);
 			return false;
