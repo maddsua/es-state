@@ -38,7 +38,38 @@ export class PersistentStateRef<T> {
 		this.hydrate();
 	};
 
-	_updateWatchers() {
+	readStorage() {
+
+		try {
+			let stateString = this._storage!.getItem(this._record_name);
+			if (stateString) this._internal_value = JSON.parse(stateString);
+		} catch (_error) {
+			console.error(`Failed to restore PersistentStateRef for: "${this._record_name}"`);
+			return false;
+		}
+
+		return true;
+	}
+
+	writeStorage() {
+
+		try {
+
+			if (this._internal_value !== null) {
+				const stateString = JSON.stringify(this._internal_value);
+				this._storage!.setItem(this._record_name, stateString);
+			}
+			else this._storage!.removeItem(this._record_name);
+
+		} catch (_error) {
+			console.error(`Failed to save PersistentStateRef for: "${this._record_name}"`);
+			return false;
+		}
+
+		return true;
+	}
+
+	updateWatchers() {
 		this._watchers = this._watchers.filter(item => item);
 		this._watchers.forEach(watcher => {
 			try {
@@ -70,18 +101,20 @@ export class PersistentStateRef<T> {
 			default: throw new Error('Unknown storage type');
 		}
 
-		try {
-			let stateString = this._storage.getItem(this._record_name);
-			if (stateString) this._internal_value = JSON.parse(stateString);
-		} catch (_error) {
-			console.error(`Failed to restore PersistentStateRef for: "${this._record_name}"`);
-			return false;
+		const readResult = this.readStorage();
+		if (readResult) {
+			this.hydrated = true;
+			this.updateWatchers();
+			return true;
 		}
 
-		this.hydrated = true;
-		this._updateWatchers();
-		return true;
+		return false;
 	};
+
+	sync() {
+		this.writeStorage();
+		this.updateWatchers();
+	}
 
 	watch(watcher: (newValue: T) => void) {
 		if (this._watchers.some(item => item === watcher)) return;
@@ -97,20 +130,8 @@ export class PersistentStateRef<T> {
 	};
 
 	set value(newValue: T) {
-
 		this._internal_value = newValue;
-		this._updateWatchers();
-
-		try {
-
-			if (newValue !== null) {
-				const stateString = JSON.stringify(this._internal_value);
-				this._storage?.setItem(this._record_name, stateString);
-			}
-			else this._storage?.removeItem(this._record_name);
-
-		} catch (_error) {
-			console.error(`Failed to save PersistentStateRef for: "${this._record_name}"`);
-		}
+		this.writeStorage();
+		this.updateWatchers();
 	};
 };
