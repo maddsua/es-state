@@ -38,6 +38,9 @@ export class PersistentStateRef<T> {
 		this.hydrate();
 	};
 
+	/**
+	 * Get data saved in storage
+	 */
 	readStorage() {
 
 		try {
@@ -51,6 +54,9 @@ export class PersistentStateRef<T> {
 		return true;
 	}
 
+	/**
+	 * Write data to storage
+	 */
 	writeStorage() {
 
 		try {
@@ -69,6 +75,9 @@ export class PersistentStateRef<T> {
 		return true;
 	}
 
+	/**
+	 * Call update callbacks on all listening watchers
+	 */
 	updateWatchers() {
 		this._watchers = this._watchers.filter(item => item);
 		this._watchers.forEach(watcher => {
@@ -80,6 +89,9 @@ export class PersistentStateRef<T> {
 		});
 	};
 
+	/**
+	 * Initializes storage when running client-side, otherwise does nothing
+	 */
 	hydrate() {
 
 		if (typeof window == 'undefined') return false;
@@ -111,24 +123,40 @@ export class PersistentStateRef<T> {
 		return false;
 	};
 
+	/**
+	 * Manually sync state
+	 */
 	sync() {
 		this.writeStorage();
 		this.updateWatchers();
 	}
 
+	/**
+	 * Get updates when state changes
+	 */
 	watch(watcher: (newValue: T) => void) {
 		if (this._watchers.some(item => item === watcher)) return;
 		this._watchers.push(watcher);
 	};
 
+	/**
+	 * Stop getting state updates
+	 */
 	unwatch(watcher: () => void) {
 		this._watchers = this._watchers.filter(item => item !== watcher);
 	};
 
+	/**
+	 * State value
+	 */
 	get value() {
 		return this._internal_value;
 	};
 
+	/**
+	 * State value
+	 * Please note that if state is an object an you change one of it's properties you'd need to call sync() after that as for now I did't implement any proxies
+	 */
 	set value(newValue: T) {
 		this._internal_value = newValue;
 		this.writeStorage();
