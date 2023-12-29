@@ -13,7 +13,7 @@ class CookieStorage {
 	setItem(key: string, value: string, expires?: Date) {
 		const valueEncoded = encodeURIComponent(value);
 		const cookieExpiration = expires || new Date(new Date().getTime() + 1_209_600_000);
-		document.cookie = `${key}=${valueEncoded}; expires=${cookieExpiration.toUTCString()}`;
+		document.cookie = `${key}=${valueEncoded}; expires=${cookieExpiration.toUTCString()}; SameSite=Strict; Secure`;
 	};
 	removeItem(key: string) {
 		this.setItem(key, '', new Date(0));
