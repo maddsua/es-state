@@ -1,3 +1,5 @@
+⚠ Moved to: https://github.com/maddsua/mws-packages/tree/main/packages/es-state
+
 # es-state
 
 Vue-like ref() but not bound to any specific framework. Persistent in local/session storage or cookie
