@@ -1,37 +1,38 @@
 
 export class StateRef<T> {
 
-	_internal_value: T;
-	_watchers: Array<(newValue: T) => void> = [];
+	private m_internal_value: T;
+	private m_subscribers: Array<(newValue: T) => void> = [];
 
 	constructor(initValue: T) {
-		this._internal_value = initValue;
+		this.m_internal_value = initValue;
 	};
 
 	watch(watcher: (newValue: T) => void) {
-		if (this._watchers.some(item => item === watcher)) return;
-		this._watchers.push(watcher);
+		if (this.m_subscribers.some(item => item === watcher)) return;
+		this.m_subscribers.push(watcher);
 	};
 
 	unwatch(watcher: () => void) {
-		this._watchers = this._watchers.filter(item => item !== watcher);
+		this.m_subscribers = this.m_subscribers.filter(item => item !== watcher);
 	};
 
 	get value() {
-		return this._internal_value;
+		return this.m_internal_value;
 	};
 
 	set value(newValue: T) {
 
-		this._internal_value = newValue;
+		this.m_internal_value = newValue;
 
-		this._watchers = this._watchers.filter(item => item);
-		this._watchers.forEach(watcher => {
+		this.m_subscribers = this.m_subscribers.filter(item => item);
+
+		for (const callback of this.m_subscribers) {
 			try {
-				watcher(this._internal_value);
+				callback(this.m_internal_value);
 			} catch (error) {
-				console.error('StateRef watcher crashed:', error);
+				console.error('StateRef watcher callback error:', error);
 			}
-		});
+		}
 	};
 };

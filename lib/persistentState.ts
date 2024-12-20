@@ -22,71 +22,66 @@ class CookieStorage {
 
 export class PersistentStateRef<T> {
 
-	_internal_value: T;
-	_watchers: Array<(newValue: T) => void> = [];
-	_storage_type: StorageType;
-	_record_name: string;
-	_storage?: Storage | CookieStorage;
+	private m_internal_value: T;
+	private m_subscribers: Array<(newValue: T) => void> = [];
+	private m_storage_type: StorageType;
+	private m_record_name: string;
+	private m_storage?: Storage | CookieStorage;
 	hydrated: boolean = false;
 
 	constructor(initValue: T, record_name: string, type?: StorageType) {
 
-		this._internal_value = initValue;
-		this._storage_type = type || 'sessionStorage';
-		this._record_name = record_name;
+		this.m_internal_value = initValue;
+		this.m_storage_type = type || 'sessionStorage';
+		this.m_record_name = record_name;
 
 		this.hydrate();
 	};
 
-	/**
-	 * Get data saved in storage
-	 */
-	readStorage() {
+	private m_readStorage() {
 
 		try {
-			let stateString = this._storage!.getItem(this._record_name);
-			if (stateString) this._internal_value = JSON.parse(stateString);
+			let stateString = this.m_storage!.getItem(this.m_record_name);
+			if (stateString) this.m_internal_value = JSON.parse(stateString);
 		} catch (_error) {
-			console.error(`Failed to restore PersistentStateRef for: "${this._record_name}"`);
+			console.error(`Failed to restore PersistentStateRef for: "${this.m_record_name}"`);
 			return false;
 		}
 
 		return true;
 	}
 
-	/**
-	 * Write data to storage
-	 */
-	writeStorage() {
+	private m_writeStorage() {
 
 		try {
 
-			if (this._internal_value !== null) {
-				const stateString = JSON.stringify(this._internal_value);
-				this._storage!.setItem(this._record_name, stateString);
+			if (typeof this.m_internal_value === 'undefined' || this.m_internal_value === null) {
+				this.m_storage!.removeItem(this.m_record_name);
+				return true;
 			}
-			else this._storage!.removeItem(this._record_name);
+
+			const stateString = JSON.stringify(this.m_internal_value);
+			this.m_storage!.setItem(this.m_record_name, stateString);
 
 		} catch (_error) {
-			console.error(`Failed to save PersistentStateRef for: "${this._record_name}"`);
+			console.error(`Failed to save PersistentStateRef for: "${this.m_record_name}"`);
 			return false;
 		}
 
 		return true;
 	}
 
-	/**
-	 * Call update callbacks on all listening watchers
-	 */
-	updateWatchers() {
-		this._watchers = this._watchers.filter(item => item);
-		this._watchers.forEach(watcher => {
+	private m_notify() {
+		
+		this.m_subscribers = this.m_subscribers.filter(item => item);
+
+		for (const callback of this.m_subscribers) {
 			try {
-				watcher(this._internal_value);
+				callback(this.m_internal_value);
 			} catch (error) {
-				console.error('StateRef watcher crashed:', error);
+				console.error('PersistentStateRef watcher callback error:', error);
 			}
-		});
+		}
 	};
 
 	/**
@@ -96,27 +91,27 @@ export class PersistentStateRef<T> {
 
 		if (typeof window == 'undefined') return false;
 
-		switch (this._storage_type) {
+		switch (this.m_storage_type) {
 
 			case 'cookie':
-				this._storage = new CookieStorage();
+				this.m_storage = new CookieStorage();
 				break;
 
 			case 'localStorage':
-				this._storage = localStorage;
+				this.m_storage = localStorage;
 				break;
 			
 			case 'sessionStorage':
-				this._storage = sessionStorage;
+				this.m_storage = sessionStorage;
 				break;
 		
 			default: throw new Error('Unknown storage type');
 		}
 
-		const readResult = this.readStorage();
+		const readResult = this.m_readStorage();
 		if (readResult) {
 			this.hydrated = true;
-			this.updateWatchers();
+			this.m_notify();
 			return true;
 		}
 
@@ -127,30 +122,30 @@ export class PersistentStateRef<T> {
 	 * Manually sync state
 	 */
 	sync() {
-		this.writeStorage();
-		this.updateWatchers();
+		this.m_writeStorage();
+		this.m_notify();
 	}
 
 	/**
 	 * Get updates when state changes
 	 */
 	watch(watcher: (newValue: T) => void) {
-		if (this._watchers.some(item => item === watcher)) return;
-		this._watchers.push(watcher);
+		if (this.m_subscribers.some(item => item === watcher)) return;
+		this.m_subscribers.push(watcher);
 	};
 
 	/**
 	 * Stop getting state updates
 	 */
 	unwatch(watcher: () => void) {
-		this._watchers = this._watchers.filter(item => item !== watcher);
+		this.m_subscribers = this.m_subscribers.filter(item => item !== watcher);
 	};
 
 	/**
 	 * State value
 	 */
 	get value() {
-		return this._internal_value;
+		return this.m_internal_value;
 	};
 
 	/**
@@ -158,8 +153,8 @@ export class PersistentStateRef<T> {
 	 * Please note that if state is an object an you change one of it's properties you'd need to call sync() after that as for now I did't implement any proxies
 	 */
 	set value(newValue: T) {
-		this._internal_value = newValue;
-		this.writeStorage();
-		this.updateWatchers();
+		this.m_internal_value = newValue;
+		this.m_writeStorage();
+		this.m_notify();
 	};
 };
